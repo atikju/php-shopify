@@ -41,16 +41,15 @@ $config = array(
 
 PHPShopify\ShopifySDK::config($config);
 ```
-##### How to get the permanent access token for a shop?
+##### How to get the permanent access token for a shop when it's a public app?
 There is a AuthHelper class to help you getting the permanent access token from the shop using oAuth. 
 
 1) First, you need to configure the SDK with additional parameter SharedSecret
-
+//config.php --> Make sure you include this file in all of your files.
 ```php
 $config = array(
-    'ShopUrl' => 'yourshop.myshopify.com',
-    'ApiKey' => '***YOUR-PRIVATE-API-KEY***',
-    'SharedSecret' => '***YOUR-SHARED-SECRET***',
+    'ApiKey' => '***YOUR-APP-API-KEY***',
+    'SharedSecret' => '***YOUR-APP-API-SECRET-KEY***',
 );
 
 PHPShopify\ShopifySDK::config($config);
@@ -61,11 +60,12 @@ PHPShopify\ShopifySDK::config($config);
 > The redirect url must be white listed from your app admin as one of **Application Redirect URLs**.
 
 ```php
-//your_authorize_url.php
+//install.php -> use this file url as APP url in your shopify public app
+include 'config.php' //see step 1
 $scopes = 'read_products,write_products,read_script_tags,write_script_tags';
 //This is also valid
 //$scopes = array('read_products','write_products','read_script_tags', 'write_script_tags'); 
-$redirectUrl = 'https://yourappurl.com/your_redirect_url.php';
+$redirectUrl = 'https://yourappurl.com/your_redirect_url.php'; //app installation will redirect to this url
 
 \PHPShopify\AuthHelper::createAuthRequest($scopes, $redirectUrl);
 ```
@@ -79,10 +79,11 @@ $redirectUrl = 'https://yourappurl.com/your_redirect_url.php';
 3) Get the access token when redirected back to the `$redirectUrl` after app authorization. 
 
 ```php
+include 'config.php' //see step 1
 //your_redirect_url.php
 PHPShopify\ShopifySDK::config($config);
 $accessToken = \PHPShopify\AuthHelper::getAccessToken();
-//Now store it in database or somewhere else
+//Now store shopurl and access token in your database.
 ```
 
 > You can use the same page for creating the request and getting the access token (redirect url). In that case just skip the 2nd parameter `$redirectUrl` while calling `createAuthRequest()` method. The AuthHelper class will do the rest for you.
@@ -92,6 +93,14 @@ $accessToken = \PHPShopify\AuthHelper::getAccessToken();
 PHPShopify\ShopifySDK::config($config);
 $accessToken = \PHPShopify\AuthHelper::createAuthRequest($scopes);
 //Now store it in database or somewhere else
+
+//For future use you can use access your merchant's store following the code below
+$config = array(
+    'ShopUrl' => 'yourshop.myshopify.com', //this comes from your database
+    'AccessToken' => '***ACCESS-TOKEN-FOR-THIRD-PARTY-APP***', //this comes from your database
+);
+
+PHPShopify\ShopifySDK::config($config);
 ```
 
 #### Get the ShopifySDK Object
